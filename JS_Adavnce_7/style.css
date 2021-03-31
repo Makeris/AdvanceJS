@@ -4,6 +4,16 @@
     box-sizing: border-box;
 }
 
+.errorText {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    font-size: 50px;
+    color: red;
+    display: none;
+}
+
 
 body {
     background-color: lightgray;
@@ -13,7 +23,7 @@ body {
 
 .sercher {
     display: flex;
-    width: 50%;
+    width: 70%;
     margin: 0 auto;
     justify-content: space-between;
     padding: 30px 0;
@@ -21,7 +31,7 @@ body {
 .film_info {
     outline: none;
     padding: 5px;
-    width: 50%;
+    width: 30%;
     border: 1px solid black;
     border-radius: 3px;
 }
@@ -40,6 +50,12 @@ body {
 
 }
 
+.searchYear,.typeSelector {
+    border-radius: 3px;
+    padding-left: 5px;
+    border: 1px solid #000;
+}
+
 .search_button:hover {
     background-color: orange;
     cursor: pointer;
@@ -54,7 +70,7 @@ body {
     border-radius: 10px;
     display: flex;
     padding: 10px;
-    padding-bottom: 20px;
+    padding-bottom: 40px;
     flex-wrap: wrap;
     /* justify  -content: space-evenly; */
     justify-content: center;

@@ -15,6 +15,10 @@ let pageCount = 1;
 
 let form = document.forms['main_form'];
 
+let type = '';
+
+let year = '';
+
 
 getSel('.search_button').addEventListener('click', request);
 
@@ -23,67 +27,101 @@ getSel('.search_button').addEventListener('click', request);
 function  request() {
     
     let filmInfo = getSel('.film_info').value;
+     type = getSel('.typeSelector').value;
+     
+     year = getSel('.searchYear').value;
+     
     
-        if(filmInfo != '') {
-            
-            const xml = new XMLHttpRequest();
-            // const descXml = new XMLHttpRequest();
-        
-            xml.open('GET',`http://www.omdbapi.com/?s=${filmInfo}&plot=full&page=${page}&apikey=5399dfd7`, false);
-            // xml.open('GET',`http://www.omdbapi.com/?i=tt0250687&apikey=5399dfd7`, false);
-        
-            xml.onreadystatechange = function(){
-                let result = xml.responseText;
-                
-                result = JSON.parse(result);
-                console.log(result);
-                
-        
-                let countOfFilms = result.Search.length;
-                
-                getSel('.main_form').innerHTML = '';
-                for(let i = 0; i < countOfFilms; i++) {
-                    // console.log(result.Search[i].Poster);
-                    getSel('.main_form').innerHTML += `<div class="card">
-                    <div class="poster"><img class="poster_image" src=${result.Search[i].Poster}></div>
-                    <div class="movies_name"><p class="card_title">${result.Search[i].Title}</p></div>
-                    <div class="type">${result.Search[i].Type}</div>
-                    <div class="year">${result.Search[i].Year}</div>
-                    <button value="${result.Search[i].imdbID}" class="card_button" name="formButton" type="button">View more</button>
-                    </div>`;
+        // if(filmInfo != '') {
 
+            console.log(myPromise())
+
+            function myPromise() {
+                return new Promise((resolve, reject) => {
+                    const xml = new XMLHttpRequest();
+
+                    xml.open('GET',`http://www.omdbapi.com/?s=${filmInfo}&plot=full&type=${type}&y=${year}&page=${page}&apikey=5399dfd7`);
+
+                    xml.onload = () => resolve(xml.responseText);
+                    xml.onerror = () => reject(xml.statusText);
+                    xml.send();
+                })
+            }
+
+            myPromise()
+                .then(succes =>  {
                     
                     
-                }
+                    let result = JSON.parse(succes);
+                    getSel('.errorText').style.display = "none";
+                    getSel('.main_form').style.display = "flex";
+                    getSel('.page_list').style.display = "flex";
+                    // getSel('.film_info').value = '';
+
+                    console.log(result.response);
+                    
+                    let countOfFilms = result.Search.length;
+                
+                    getSel('.main_form').innerHTML = '';
+                    for(let i = 0; i < countOfFilms; i++) {
+                        
+                        getSel('.main_form').innerHTML += `<div class="card">
+                        <div class="poster"><img class="poster_image" src=${result.Search[i].Poster}></div>
+                        <div class="movies_name"><p class="card_title">${result.Search[i].Title}</p></div>
+                        <div class="type">${result.Search[i].Type}</div>
+                        <div class="year">${result.Search[i].Year}</div>
+                        <button value="${result.Search[i].imdbID}" class="card_button" name="formButton" type="button">View more</button>
+                        </div>`;
+
+                        
+                        
+                    }
                 
                 let a = setTimeout(createButtons, 10);
                 function createButtons() {
-                    for(let i = 0; i < countOfFilms; i++) {
-                        // console.log(form.children[i]);
-                        form.formButton[i].addEventListener('click',function(){
-                            // getSel('.film_description').style.display = 'flex';
-                            requestFilmInfo(form.formButton[i].value);
 
 
+                    if(countOfFilms > 1) {
+
+                        for(let i = 0; i < countOfFilms; i++) {
+                            
+                            form.formButton[i].addEventListener('click',function(){
+                                
+                                requestFilmInfo(form.formButton[i].value);
+    
+                            })
+                        }
+                    } else {
+                        form.formButton.addEventListener('click',function(){
+                                
+                            requestFilmInfo(form.formButton.value);
 
                         })
                     }
                     
                 }
-        
+
                 getSel('.page_list').style.visibility = 'visible';
                 getSel('.current_page').innerText = pageCount;
                 
                 getSel('.count_of_pages').innerText = Math.ceil(result.totalResults/10);
+
+                }
                 
+                )
+                .catch(data => {
+
+                    getSel('.errorText').style.display = "block";
+                    getSel('.main_form').style.display = "none";
+                    getSel('.page_list').style.display = "none";
+                    // console.log(data);
+                    getSel('.film_info').value = '';
+                })
                 
 
-                
-            }
-            xml.send();
-        } else {
-            console.log('Empty');
-        }
+        // } else {
+        //     console.log('Empty');
+        // }
 
     
     
@@ -93,8 +131,7 @@ function  request() {
 
 
 function requestFilmInfo(id) {
-    // console.log(getSel('.search_button').value);
-
+    
     const xml = new XMLHttpRequest();
 
     
@@ -104,6 +141,7 @@ function requestFilmInfo(id) {
         let result = xml.responseText
         result = JSON.parse(result);
         console.log(result);
+        
         getSel('.raiting').innerText = '';
         getSel('.description_title').innerText = result.Title;
         getSel('.description_type').innerText = result.Genre;
@@ -115,12 +153,13 @@ function requestFilmInfo(id) {
         getSel('.awards').innerText = result.Awards;
         getSel('.descrition_poster_image').style.backgroundImage = `url(${result.Poster})`;
         closer();
-        // console.log(result.Ratings[0].Source, result.Ratings[0].Value);
+        
 
         for(let i = 0; i < result.Ratings.length; i++ ) {
             getSel('.raiting').innerHTML += `${result.Ratings[i].Source} ${result.Ratings[i].Value} <br>`;
             
         }
+        
 
     }
     xml.send();
@@ -131,7 +170,7 @@ function requestFilmInfo(id) {
 
 function closer() {
     
-    // console.log('ad');
+    
 
     getSel('.film_description').style.display = 'flex';
 
@@ -164,4 +203,6 @@ getSel('.countUp').addEventListener('click', function () {
     
        
 })
+
+
 
